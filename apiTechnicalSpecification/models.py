@@ -8,8 +8,8 @@ from rest_framework.exceptions import ValidationError
 
 class EquipmentType(models.Model):
     code = models.AutoField(primary_key=True)
-    title = models.CharField(_('Маска'), max_length=255)
-    serial_number_mask = models.CharField(max_length=20, blank=True, default='', unique=True)
+    title = models.CharField(_('Наименование оборудования'), max_length=255)
+    serial_number_mask = models.CharField(_('Маска'), max_length=20, blank=True, default='', unique=True)
 
     class Meta:
         verbose_name = _('Тип Оборудования')
