@@ -9,21 +9,8 @@ from rest_framework.exceptions import ValidationError
 class EquipmentType(models.Model):
     code = models.AutoField(primary_key=True)
     title = models.CharField(_('Маска'), max_length=255)
-    serial_number_mask = models.CharField(max_length=20, blank=True, default='')
+    serial_number_mask = models.CharField(max_length=20, blank=True, default='', unique=True)
 
-    # def clean_serial_number_mask(self):
-    #     """Проверка корректности маски серийного номера."""
-    #     if not self.serial_number_mask:
-    #         raise ValidationError('Маска серийного номера должна быть задана.')
-    #     if not re.match(r'^[Nn][Aa][Xx]+$', self.serial_number_mask):
-    #         raise ValidationError(
-    #             'Маска серийного номера не соответствует формату.')
-    #     return self.serial_number_mask
-    #
-    # def save(self, *args, **kwargs):
-    #     self.clean_serial_number_mask()
-    #     super().save(*args, **kwargs)
-    #
     class Meta:
         verbose_name = _('Тип Оборудования')
         verbose_name_plural = _('Тип Оборудования')
@@ -38,6 +25,11 @@ class Equipment(models.Model):
     serial_number = models.CharField(max_length=20, validators=[RegexValidator(regex=r'^[0-9A-Za-zX-Z-_@]+$', message='Серийный номер не соответствует маске.')])
     note = models.TextField()
 
+    def clean(self):
+        validate_serial_number(self.serial_number, self.equipment_type.serial_number_mask)
+        if Equipment.objects.filter(serial_number=self.serial_number).exists():
+            raise ValidationError(f'Серийный номер {self.serial_number} уже существует.')
+
     def get_absolute_url(self):
         return f'/search/{self.code}/update/'
 
@@ -47,3 +39,21 @@ class Equipment(models.Model):
 
     def __str__(self):
         return f'{self.equipment_type}:{self.serial_number}'
+
+
+def validate_serial_number(value, serial_number_mask):
+    regex = pattern_to_regex(serial_number_mask)
+    if not re.fullmatch(regex, value):
+        raise ValidationError(f'{value} не соответствует шаблону: {serial_number_mask}')
+
+
+def pattern_to_regex(serial_number_mask):
+    mapping = {
+        'N': r'\d',
+        'A': r'[A-Z]',
+        'a': r'[a-z]',
+        'X': r'[A-Z0-9]',
+        'Z': r'[-_@]'
+    }
+    regex = ''.join(mapping.get(char, char) for char in serial_number_mask)
+    return regex
