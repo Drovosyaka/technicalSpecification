@@ -1,0 +1,14 @@
+{% extends 'mainPage.html' %}
+
+{% block h1 %}Форма удаления записи{% endblock %}
+
+{% block title %}Форма удаления записи{% endblock %}
+
+{% block content %}
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Удалить</button>
+        </form>
+    </div>
+{% endblock %}

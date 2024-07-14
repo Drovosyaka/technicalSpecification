@@ -1,0 +1,18 @@
+{% extends 'mainPage.html' %}
+
+{% block h1 %}Форма добавления записи{% endblock %}
+
+{% block title %}Форма добавления записи{% endblock %}
+
+{% block content %}
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            <p>Выбор оборудования: {{ form.equipment_type }}</p><br>
+            {{ form.serial_number }}<br>
+            {{ form.note }}<br>
+            <span>{{ error }}</span>
+            <button class="btn btn-success" type="submit">Добавить</button>
+        </form>
+    </div>
+{% endblock %}
